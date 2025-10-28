@@ -147,13 +147,35 @@ function downloadSample(){
 
 function parseFile(file){
   const reader = new FileReader();
-  reader.onload = function(e){
+  reader.onload = function(e){    
     const data = new Uint8Array(e.target.result);
     const workbook = XLSX.read(data,{type:'array'});
     const first = workbook.SheetNames[0];
     const sheet = workbook.Sheets[first];
     let json = XLSX.utils.sheet_to_json(sheet,{defval: ''});
     if(json.length===0){ alert('No data found in sheet'); return; }
+
+    // =============================
+// AUTOLOAD DEFAULT CSV ON START
+// =============================
+window.addEventListener("DOMContentLoaded", () => {
+  // Try to fetch default CSV from the same repo
+  fetch("default_data.csv")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("No default_data.csv found");
+      }
+      return response.text();
+    })
+    .then(csvText => {
+      console.log("✅ Default CSV loaded automatically.");
+      processData(csvText); // your existing logic
+    })
+    .catch(error => {
+      console.warn("⚠️ Could not load default CSV:", error);
+    });
+});
+
 
     // normalize headers by mapping keys
     const normalized = json.map(row=>{
@@ -347,3 +369,4 @@ initEmptyCharts();
 </script>
 </body>
 </html>
+
