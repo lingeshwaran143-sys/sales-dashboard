@@ -155,28 +155,6 @@ function parseFile(file){
     let json = XLSX.utils.sheet_to_json(sheet,{defval: ''});
     if(json.length===0){ alert('No data found in sheet'); return; }
 
-    // =============================
-// AUTOLOAD DEFAULT CSV ON START
-// =============================
-window.addEventListener("DOMContentLoaded", () => {
-  // Try to fetch default CSV from the same repo
-  fetch("default_data.csv")
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("No default_data.csv found");
-      }
-      return response.text();
-    })
-    .then(csvText => {
-      console.log("✅ Default CSV loaded automatically.");
-      processData(csvText); // your existing logic
-    })
-    .catch(error => {
-      console.warn("⚠️ Could not load default CSV:", error);
-    });
-});
-
-
     // normalize headers by mapping keys
     const normalized = json.map(row=>{
       const out = {};
@@ -366,7 +344,50 @@ function initEmptyCharts(){
   charts.prodContribChart = new Chart(document.getElementById('prodContribChart').getContext('2d'),{type:'pie',data:{labels:[],datasets:[{data:[]}]},options:{responsive:true,maintainAspectRatio:false}});
 }
 initEmptyCharts();
+  // =============================
+// AUTOLOAD DEFAULT CSV ON PAGE LOAD
+// =============================
+window.addEventListener("DOMContentLoaded", () => {
+  fetch("default_data.csv")
+    .then(response => {
+      if (!response.ok) throw new Error("No default_data.csv found");
+      return response.text();
+    })
+    .then(csvText => {
+      // parse CSV text to JSON similar to Excel handling
+      const rows = csvText.trim().split("\n");
+      const headers = rows[0].split(",").map(h => h.trim().toLowerCase());
+      const data = rows.slice(1).map(line => {
+        const values = line.split(",");
+        const obj = {};
+        headers.forEach((h, i) => {
+          const key = HEADER_MAP[h] || h.replace(/\s+/g, "_");
+          obj[key] = values[i] ? values[i].trim() : "";
+        });
+        return obj;
+      });
+
+      // convert numeric columns
+      rawData = data.map(r => ({
+        state: String(r.state || "").trim(),
+        district: String(r.district || "").trim(),
+        style: String(r.style || "").trim(),
+        product_category: String(r.product_category || "").trim(),
+        sale_order_qty: Number(r.sale_order_qty) || 0,
+        delivered_qty: Number(r.delivered_qty) || 0
+      }));
+
+      console.log("✅ Default CSV loaded successfully with " + rawData.length + " records.");
+
+      populateFilters();
+      updatePreview();
+      updateAllDisplays();
+    })
+    .catch(err => console.warn("⚠️ No default CSV found:", err));
+});
+
 </script>
 </body>
 </html>
+
 
