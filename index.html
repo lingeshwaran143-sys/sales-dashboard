@@ -343,8 +343,7 @@ function initEmptyCharts(){
   charts.topStylesChart = new Chart(document.getElementById('topStylesChart').getContext('2d'),{type:'bar',data:{labels:[],datasets:[{label:'Sale Order Qty',data:[]}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false}});
   charts.prodContribChart = new Chart(document.getElementById('prodContribChart').getContext('2d'),{type:'pie',data:{labels:[],datasets:[{data:[]}]},options:{responsive:true,maintainAspectRatio:false}});
 }
-initEmptyCharts();
-  // =============================
+    // =============================
 // AUTOLOAD DEFAULT CSV ON PAGE LOAD
 // =============================
 window.addEventListener("DOMContentLoaded", () => {
@@ -385,9 +384,12 @@ window.addEventListener("DOMContentLoaded", () => {
     })
     .catch(err => console.warn("⚠️ No default CSV found:", err));
 });
+initEmptyCharts();
+
 
 </script>
 </body>
 </html>
+
 
 
